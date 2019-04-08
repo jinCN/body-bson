@@ -3,8 +3,7 @@ const typeIs = require('type-is')
 const bytes = require('bytes')
 const getBody = require('raw-body')
 const Cb = require('@superjs/cb')
-let bson = getBSON()
-
+let bson = new BSON()
 module.exports = function (options = {}) {
   options = {
     ...options
@@ -13,11 +12,13 @@ module.exports = function (options = {}) {
     ? bytes.parse(options.limit || '10mb')
     : options.limit
   options.type = Array.isArray(options.type)
-    ? [options.type || 'application/bson'] || []
-    : options.type
+    ? options.type
+    : [options.type || 'application/bson'] || []
+  options.bson = options.bson || bson
   
   return handler.bind(null, options)
 }
+module.exports.bson = bson
 
 function handler (options = {}, arg1, arg2, arg3) {
   if (isKoa(arg1)) {
@@ -31,7 +32,7 @@ async function handlerForKoa (options, ctx, next) {
   if (!typeIs(ctx.req, options.type)) {
     return next()
   }
-  await readBSON(ctx.req, ctx)
+  await readBSON(options, ctx.req, ctx.request)
   return next()
 }
 
@@ -48,9 +49,9 @@ async function readBSON (options, req, hostObj) {
   if (!typeIs.hasBody(req)) {
     return
   }
-  getBody(req, { limit: options.limit }, Cb())
+  getBody(req, {limit: options.limit}, Cb().pair)
   let rawBody = await Cb.pop()
-  hostObj.body = bson.deserialize(rawBody)
+  hostObj.body = options.bson.deserialize(rawBody)
   if (options.rawbody) hostObj.rawBody = rawBody
 }
 
@@ -63,12 +64,4 @@ function isKoa (ctx) {
 function isObject (value) {
   const type = typeof value
   return value != null && (type === 'object' || type === 'function')
-}
-
-function getBSON () {
-  try {
-    return new BSON.BSONNative.BSON()
-  } catch (e) {
-    return new BSON.BSONPure.BSON()
-  }
 }

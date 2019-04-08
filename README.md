@@ -38,6 +38,7 @@ app.use(function (req, res) {
 
 ## API
 
+### `bodyBson`
 ```javascript
 var bodyBson = require('body-bson')
 ```
@@ -46,12 +47,20 @@ The bodyBson function is a factory to create middleware.
 ```javascript
 app.use(bodyBson(option))
 ```
-The middleware will populate the `req.body` 
+The middleware will populate the `request.rawBody` 
 property with the parsed body when the Content-Type request header matches the type option(default to 
 `application/bson`), nothing would be modified if the Content-Type was not matched, or an error occurred.
 
+### `bodyBson.bson`
+
+The default bson instance used by bodyBson. It's exported for convenience.
 
 ### options
+
+### `bson`
+Controls the bson instance to deserialize the body. 
+One method is required for the instance: `bson.deserialize(buffer)`. 
+Defaults to instance created by `bson@1.1.0`.
 
 ### `limit`
 
@@ -63,5 +72,4 @@ Controls the maximum request body size. If this is a number, then the value spec
  Controls the matching Content-Type headers, can pass a string or an array of strings. Defaults to `'application/bson'`.
 
 ### `rawBody`
-Controls whether to generate `ctx.rawBody`/`req.rawBody` to represent raw buffer received. `ctx.rawBody`/`req
-.rawBody` will only be generated if `ctx.body`/`req.body` should be generated. Defaults to `false`.
+Controls whether to generate `request.rawBody` to represent raw buffer received. `request.rawBody` will only be generated if `request.rawBody` should be generated. Defaults to `false`.
