@@ -1,7 +1,7 @@
 {
   "name": "body-bson",
-  "version": "1.0.9",
-  "description": "express/koa middleware to parse bson body",
+  "version": "1.0.13",
+  "description": "express/koa middleware to parse bson body.",
   "main": "index.js",
   "engines": {
     "node": ">=6"

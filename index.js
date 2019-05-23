@@ -4,16 +4,18 @@ const bytes = require('bytes')
 const getBody = require('raw-body')
 const Cb = require('@superjs/cb')
 let bson = new BSON()
+/***
+ *
+ * @param options : {deserializeOption,limit,type,bson}
+ */
 module.exports = function (options = {}) {
-  options = {
-    ...options
-  }
   options.limit = typeof options.limit !== 'number'
     ? bytes.parse(options.limit || '10mb')
     : options.limit
   options.type = Array.isArray(options.type)
     ? options.type
     : [options.type || 'application/bson'] || []
+  
   options.bson = options.bson || bson
   
   return handler.bind(null, options)
@@ -51,7 +53,7 @@ async function readBSON (options, req, hostObj) {
   }
   getBody(req, {limit: options.limit}, Cb().pair)
   let rawBody = await Cb.pop()
-  hostObj.body = options.bson.deserialize(rawBody)
+  hostObj.body = options.bson.deserialize(rawBody, options.deserializeOption)
   if (options.rawbody) hostObj.rawBody = rawBody
 }
 
